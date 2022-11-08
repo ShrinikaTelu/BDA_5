@@ -1,0 +1,140 @@
+import java.io.*;
+import java.util.*;
+
+
+public class MultiplicationMatrix{
+
+  static HashMap<String, List<String>> hash_b = new HashMap<>(); /*Creating a hash Map to store the key-value pairs from the mapper
+                                                                   and combine them w.r.t their keys*/
+  static HashMap<String, List<String>> hash_a = new HashMap<>();
+  public static void combiner(String temp[], int column_A, int row_B)  
+  
+  {  
+    /*
+   The combiner takes the input from the Mapper function and combines the given values in a HashMap
+   */
+
+    if (temp[0].equals("A")) { //Checks if the first value sent is A or B, if it is A the values are stored in hash A 
+      int i = Integer.parseInt(temp[1]);
+      int j = Integer.parseInt(temp[2]);
+      int Aij = Integer.parseInt(temp[3]);
+      for (int k = 0; k < column_A + 1; k++) {
+        if (hash_a.containsKey(i + "," + k )) {
+          hash_a
+            .get(  i + "," + k  )
+            .add( j + "," + Aij );
+        } else {
+          hash_a.put(  i + "," + k , new ArrayList<String>());
+          hash_a
+            .get(i + "," + k )
+            .add(j + "," + Aij );
+        }
+      }
+    } else {
+      int j = Integer.parseInt(temp[1]);
+      int k = Integer.parseInt(temp[2]);
+      int Bjk = Integer.parseInt(temp[3]);
+      for (int i = 0; i < row_B + 1; i++) {
+        if (hash_b.containsKey( i + "," + k )) {
+          hash_b
+            .get(i + "," + k)
+            .add( j + "," + Bjk );
+        } else {
+          hash_b.put(i + "," + k , new ArrayList<String>());
+          hash_b
+            .get(i + "," + k )
+            .add(j + "," + Bjk );
+        }
+      }
+    }
+  } 
+
+
+  public static void reducer(){
+    /*
+     * Goes through the hash tables and multiplies the respective values and adds them
+     */
+    for (Map.Entry<String, List<String>> entryA : hash_a.entrySet()) {
+      for (Map.Entry<String, List<String>> entryB : hash_b.entrySet()) {
+        if(entryB.getKey().equals(entryA.getKey())){
+          int element = 0;
+          String key = "";
+          for (String varA : entryA.getValue()) 
+          { 
+              for (String varB : entryB.getValue()) 
+              { 
+                if(varA.split(",")[0].equals(varB.split(",")[0])){
+                  int prod = Integer.parseInt(varA.split(",")[1])*Integer.parseInt(varB.split(",")[1]);
+                  element = element + prod;
+                }
+              }
+              key = entryA.getKey();
+              
+          }
+          System.out.println("Matrix index: " + key + ", Element value: " + element); // Emits the key value pair, where key is the element index and value is the matrix's element at that index
+
+
+        }
+      }
+    }
+
+  }
+  public static void main(String args[]) {
+     
+    try {
+      
+      FileInputStream fis = new FileInputStream(
+        "C:/Users/user/Downloads/input.txt" // File location
+      ); //The file location, selecting the file
+      FileInputStream fis2 = new FileInputStream(
+        "C:/Users/user/Downloads/input.txt" // Same file location for finding the matrix size
+      );
+      Scanner sc = new Scanner(fis); //file to be scanned
+      Scanner sc_1 = new Scanner(fis2);
+      int row_A = 0;
+      int column_A = 0;
+      int row_B = 0;
+      int column_B = 0;
+      while (sc_1.hasNextLine()) { // Finding the order of the matrices
+        String currLineString = sc_1.nextLine(); // Reads the current line
+        String temp[] = currLineString.split(",");
+        if (temp[0].equals("A")) {
+          if (Integer.parseInt(temp[1]) > row_A){
+            row_A = Integer.parseInt(temp[1]);
+          }
+          if (Integer.parseInt(temp[2])> column_A){
+            column_A = Integer.parseInt(temp[1]);
+          }
+          
+        } else{
+          if (Integer.parseInt(temp[1]) > row_B){
+            row_B = Integer.parseInt(temp[1]);
+          }
+          if (Integer.parseInt(temp[2])> column_B){
+            column_B = Integer.parseInt(temp[1]);
+          }
+          
+        }
+        
+        
+      }
+
+      while (sc.hasNextLine()) {
+        String currLineString = sc.nextLine(); // Reads the current line
+        String temp[] = currLineString.split(","); // Splits the line with the delimiter ',' and stores in an array for further use.
+        combiner(temp, column_A, row_B); //It is sent to the combiner 
+        
+      }
+
+
+      reducer(); //After Mapper and Combiner are succesfully run, Reducer starts functioning
+
+
+      sc.close(); //closes the scanner
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+}
+
+
